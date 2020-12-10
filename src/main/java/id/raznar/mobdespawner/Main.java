@@ -22,7 +22,7 @@ public final class Main extends JavaPlugin implements Listener {
         this.getLogger().info("Try our hosting! https://raznar.id");
         this.getLogger().info("--------------------------------");
 
-        this.getServer().getScheduler().runTaskTimer(this, () -> {
+        this.getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
             for (World world : this.getServer().getWorlds()) {
                 world.getEntities().stream()
                         .filter(Objects::nonNull)
@@ -75,10 +75,12 @@ public final class Main extends JavaPlugin implements Listener {
         if (!nearbyPlayer) {
             Chunk chunk = entity.getLocation().getChunk();
             if (chunk.isLoaded()) {
-                entity.remove();
-                chunk.unload(true);
+                this.getServer().getScheduler().runTask(this, () -> {
+                    entity.remove();
+                    chunk.unload(true);
+                });
             } else {
-                entity.remove();
+                this.getServer().getScheduler().runTask(this, entity::remove);
             }
         }
     }
